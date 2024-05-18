@@ -22,6 +22,6 @@ CFS给N个进程每个进程分配1/N的处理器时间
 socket() 创建套接字
 int socket(int domain, int type, int protpcol)
 
-netstat -alnt | gerp 20001
+netstat -alnt | grep 20001
 ps -ef | grep girl
 进入进程所在文件
