@@ -65,13 +65,29 @@ poll返回后，遍历每个pollfd，看里面的revents内容，用revents || P
 2、需要遍历pollfd中的fd，O(n)复杂度
 
 epoll概述：
-底层使用红黑树，不需要遍历fd
-有内存映射，不需要内核态、用户态切换
+epoll_event结构体
+typedef union epoll_data {
+void    *ptr;
+int      fd;
+uint32_t u32;
+uint64_t u64;
+} epoll_data_t;
+struct epoll_event {
+uint32_t     events;    /* Epoll events */
+epoll_data_t data;      /* User data variable */
+};
+文件描述符ev.data.fd，监控事件ev.events
 
 流程：
 epfd = epoll_create(10) 创建一个白板
-epoll_event结构体，
-文件描述符ev.data.fd，监控事件ev.events
-epoll_ctl(epfd, EPOLL_CTL_ADD, ev.data.fd, &ev) 把文件fd注册进epfd中
-nfds = epoll_wait(epfd, events, 5, 10000) 返回ready的epoll_event个数，从events[i].data.fd中读取数据
+构建监控事件的epoll_event ev，通过epoll_ctl把ev注册进epfd中
+epoll_ctl(epfd, EPOLL_CTL_ADD, ev.data.fd, &ev) 
+nfds = epoll_wait(epfd, events, 5, 10000) 把返回的事件存放在提前构建的数组events中
+events前nfds存放ready的fd，通过events[i].data.fd
+ready的epoll_event个数，从events[i].data.fd中读取数据
+
+底层使用红黑树，不需要遍历fd
+有内存映射，不需要内核态、用户态切换
+
+
 
