@@ -25,3 +25,28 @@ int socket(int domain, int type, int protpcol)
 netstat -alnt | grep 20001
 ps -ef | grep girl
 进入进程所在文件
+
+select 和epoll的实现和API
+
+select概述：
+最大支持1024个fd，大小取决于操作系统支持；
+1024个bitmap，先把需要监控的文件注册到bitmap中，这些文件的位为1，其他为0；
+调用select，ready的文件的bit位仍为1，其他为0。
+
+缺点：
+1、需要内核态、用户态切换
+2、bitmap有上限，2014
+3、fd_set不可重用，每次要把fd_set置位，把fd注册到fd_set中
+4、需要遍历rfds中的fd，O(n)复杂度
+
+流程：
+构建fd_set rfds，读文件描述符集合，还可以有写文件集合，错误文件集合
+FD_ZERO(&rfds) 将rfds置零
+FD_SET(fd_i, &rfds) 将fd_i加入到rfds中
+select(maxfd + 1, &rfds, NULL, NULL, NULL) 调用select，等待rfds中的fd成为ready状态，select返回说明有fd ready了
+FD_ISSET(fd_i, &rfds); 遍历所有rfds中的fd，如果fd_i仍为1，表面fd_i ready了
+
+
+
+
+
